@@ -1,0 +1,26 @@
+# Rust
+/target/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Nix
+result
+result-*
+
+# Test files
+test_photos/
+*.jpg
+*.jpeg
+*.tiff
+*.tif
+*.raw
+*.cr2
+*.nef
+*.arw
+*.dng

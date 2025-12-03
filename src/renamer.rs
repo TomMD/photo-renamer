@@ -16,7 +16,7 @@ pub async fn rename_photo<P: AsRef<Path>>(file_path: P) -> Result<Option<PathBuf
         }
     };
 
-    let new_name = generate_new_filename(&metadata).await?;
+    let new_name = generate_new_filename(&metadata)?;
     
     if let Some(new_filename) = new_name {
         let parent_dir = path.parent().unwrap_or(Path::new("."));
@@ -50,16 +50,16 @@ pub async fn rename_photo<P: AsRef<Path>>(file_path: P) -> Result<Option<PathBuf
     }
 }
 
-async fn generate_new_filename(metadata: &PhotoMetadata) -> Result<Option<String>> {
+fn generate_new_filename(metadata: &PhotoMetadata) -> Result<Option<String>> {
     if let Some(datetime) = &metadata.datetime {
-        let date_str = datetime.format("%Y%m%d").to_string();
+        let datetime_str = datetime.format("%Y%m%d%H%M%S").to_string();
         
         if let Some(gps) = &metadata.gps {
-            let location = get_location_name(gps).await
+            let location = get_location_name(gps)
                 .unwrap_or_else(|_| format!("{:08.4}{:09.4}", gps.latitude, gps.longitude));
-            Ok(Some(format!("{}-{}", date_str, location)))
+            Ok(Some(format!("{}-{}", datetime_str, location)))
         } else {
-            Ok(Some(date_str))
+            Ok(Some(datetime_str))
         }
     } else {
         Ok(None)

@@ -5,11 +5,9 @@ edition = "2021"
 
 [dependencies]
 kamadak-exif = "0.6"
-chrono = { version = "0.4", features = ["serde"] }
+chrono = "0.4"
 clap = { version = "4.0", features = ["derive"] }
-reqwest = { version = "0.11", features = ["json", "blocking"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 anyhow = "1.0"
 walkdir = "2.0"
+reverse_geocoder = "3.0"
