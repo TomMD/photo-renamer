@@ -15,6 +15,14 @@ pub struct GpsCoordinates {
 pub struct PhotoMetadata {
     pub datetime: Option<DateTime<Utc>>,
     pub gps: Option<GpsCoordinates>,
+    pub datetime_source: DateTimeSource,
+}
+
+#[derive(Debug, Clone)]
+pub enum DateTimeSource {
+    Exif,
+    Filename,
+    None,
 }
 
 pub fn extract_metadata<P: AsRef<Path>>(path: P) -> Result<PhotoMetadata> {
@@ -30,8 +38,14 @@ pub fn extract_metadata<P: AsRef<Path>>(path: P) -> Result<PhotoMetadata> {
 
     let datetime = extract_datetime(&exif)?;
     let gps = extract_gps_coordinates(&exif)?;
+    
+    let datetime_source = if datetime.is_some() {
+        DateTimeSource::Exif
+    } else {
+        DateTimeSource::None
+    };
 
-    Ok(PhotoMetadata { datetime, gps })
+    Ok(PhotoMetadata { datetime, gps, datetime_source })
 }
 
 fn extract_datetime(exif_data: &exif::Exif) -> Result<Option<DateTime<Utc>>> {

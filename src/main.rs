@@ -1,4 +1,5 @@
 mod exif_extractor;
+mod filename_extractor;
 mod geocoding;
 mod renamer;
 

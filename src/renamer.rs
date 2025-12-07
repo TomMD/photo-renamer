@@ -2,19 +2,33 @@ use anyhow::{Context, Result};
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
-use crate::exif_extractor::{extract_metadata, PhotoMetadata};
+use crate::exif_extractor::{extract_metadata, PhotoMetadata, DateTimeSource};
+use crate::filename_extractor::extract_date_from_filename;
 use crate::geocoding::get_location_name;
 
 pub async fn rename_photo<P: AsRef<Path>>(file_path: P) -> Result<Option<PathBuf>> {
     let path = file_path.as_ref();
     
-    let metadata = match extract_metadata(path) {
+    let mut metadata = match extract_metadata(path) {
         Ok(meta) => meta,
         Err(_) => {
-            println!("No EXIF data found for: {}", path.display());
-            return Ok(None);
+            // Create empty metadata for filename fallback
+            PhotoMetadata {
+                datetime: None,
+                gps: None,
+                datetime_source: DateTimeSource::None,
+            }
         }
     };
+
+    // If no EXIF datetime, try extracting from filename
+    if metadata.datetime.is_none() {
+        if let Ok(Some(filename_date)) = extract_date_from_filename(path) {
+            metadata.datetime = Some(filename_date);
+            metadata.datetime_source = DateTimeSource::Filename;
+            println!("Extracted date from filename for: {}", path.display());
+        }
+    }
 
     let new_name = generate_new_filename(&metadata)?;
     
@@ -45,7 +59,7 @@ pub async fn rename_photo<P: AsRef<Path>>(file_path: P) -> Result<Option<PathBuf
         
         Ok(Some(final_path))
     } else {
-        println!("No datetime information found for: {}", path.display());
+        println!("No datetime information found in EXIF or filename for: {}", path.display());
         Ok(None)
     }
 }
